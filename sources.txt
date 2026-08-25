@@ -1,0 +1,24 @@
+# Blocklists merged into cstrike/cfg/server_blacklist.txt, one URL per line.
+# Blank lines and #-comments are ignored.
+#
+# GitHub "blob" links are rewritten to raw links automatically, so you can
+# paste the address straight out of your browser.
+#
+# Order matters only for duplicates: the first list to mention an address
+# supplies its name and date. Everything else is a plain union.
+#
+# Your own copy of this file lives in the config directory and takes
+# precedence over the one in the repository:
+#   Linux    ~/.config/css-blocklist-merge/sources.txt
+#   macOS    ~/Library/Application Support/css-blocklist-merge/sources.txt
+#   Windows  %APPDATA%\css-blocklist-merge\sources.txt
+
+# ~7.6k entries. The only list that covers the SGaming.RU network (~5.8k of
+# them), and it already contains all of Ballganda's entries.
+https://github.com/krnl86/css-server-blacklist/blob/main/server_blacklist.txt
+
+# The original, most actively maintained list.
+https://github.com/Ballganda/css-server-blacklist/blob/main/server_blacklist.txt
+
+# Smaller, independently collected list.
+https://github.com/JakeM650/css-server-blacklist/blob/main/server_blacklist.txt

@@ -1,0 +1,11 @@
+# Normalise line endings on the way in.
+* text=auto eol=lf
+
+*.py text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.yml text eol=lf
+
+# Windows shims must keep CRLF to stay valid batch files.
+*.cmd text eol=crlf
+*.bat text eol=crlf

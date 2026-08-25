@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Claude Code local settings
+.claude/
+
+# Local blocklist artefacts, in case anyone runs the tool inside the checkout
+server_blacklist.txt
+*.bak
+*.tmp
+
+# Editors / OS
+*.swp
+*~
+.DS_Store

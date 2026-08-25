@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.9", "3.13"]
+        exclude:
+          # setup-python ships no macOS arm64 build for 3.9; 3.13 covers macOS.
+          - os: macos-latest
+            python: "3.9"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: CLI smoke test
+        run: |
+          python css_blocklist_merge.py --version
+          python css_blocklist_merge.py --help
+
+      # Exercises the real install path on each OS: the Windows .cmd shim, the
+      # POSIX chmod, config seeding, and clean removal afterwards.
+      - name: Install and uninstall
+        env:
+          XDG_BIN_HOME: ${{ runner.temp }}/bin
+        run: |
+          python install.py
+          python install.py --uninstall --purge
