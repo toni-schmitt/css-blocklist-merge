@@ -46,8 +46,9 @@ That is the whole setup. Launch the game normally from here on.
 | [krnl86/css-server-blacklist](https://github.com/krnl86/css-server-blacklist) | ~7,600 | The SGaming.RU network (~5,800 entries), ATMMIX.RU, ALkoGoLiki, RR18.RU; contains all of Ballganda's entries |
 | [Ballganda/css-server-blacklist](https://github.com/Ballganda/css-server-blacklist) | ~310 | The original list, most actively maintained |
 | [JakeM650/css-server-blacklist](https://github.com/JakeM650/css-server-blacklist) | ~91 | Independently collected, small |
+| [Exomatic/steamserverspamfilter](https://github.com/Exomatic/steamserverspamfilter) | ~1,800 | Bare IPs published for firewalls, derived from the hl2dm.org spamfilter; spam across Source games, each IP blocked on every port. ~1,500 are in none of the lists above |
 
-Together roughly **7,700 unique servers**. Sizes are as of August 2026 and drift as the lists are maintained.
+Together roughly **9,200 unique entries**. Sizes are as of October 2026 and drift as the lists are maintained.
 
 ## Adding more blocklists
 
@@ -67,10 +68,12 @@ https://github.com/someone/their-blacklist/blob/main/server_blacklist.txt
 
 Any file in Valve's `serverblacklist` KeyValues format works — including one you export from the game's own **Blacklisted Servers** tab and host yourself.
 
+So does a plain list of IP addresses, one per line, like the ones published for firewalls. Each address is blocked on every port. Addresses ending in `.0` are skipped, because the game reads `a.b.c.0` as the whole /24 rather than one address.
+
 ## How it works
 
 1. **Reads what is already on disk**, so servers you blocked in-game are never lost.
-2. **Downloads each source** and parses it leniently. Published lists are not uniformly formatted — some entries have odd indentation, some are missing their `"server"` key entirely — and the parser accepts any `{ … }` block carrying an `addr`, which is what the game itself does.
+2. **Downloads each source** and parses it leniently. Published lists are not uniformly formatted — some entries have odd indentation, some are missing their `"server"` key entirely — and the parser accepts any `{ … }` block carrying an `addr`, which is what the game itself does. A source with no such blocks is read as a plain IP list.
 3. **Merges by address.** The first list to mention an address supplies its name and date; the rest is a plain union.
 4. **Writes atomically** — to a temporary file beside the target, then renames — so the game can never read a half-written blocklist. The previous file is kept as `server_blacklist.txt.bak`.
 5. **Hands off to the game** by replacing itself with the real command, so Steam keeps tracking playtime, the overlay and the process as usual.
@@ -128,7 +131,7 @@ Then clear the game's Steam launch option. Your `server_blacklist.txt` is left i
 python3 -m unittest discover tests
 ```
 
-Covers the parser's tolerance for malformed real-world lists, merge precedence, atomic writes, name sanitization, and Steam library discovery against a synthetic install tree. No network access required.
+Covers the parser's tolerance for malformed real-world lists, plain IP lists, merge precedence, atomic writes, name sanitization, and Steam library discovery against a synthetic install tree. No network access required.
 
 ## License
 

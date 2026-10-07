@@ -16,6 +16,7 @@ Standard library only, no dependencies.
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import os
 import re
 import subprocess
@@ -23,7 +24,7 @@ import sys
 import urllib.request
 from pathlib import Path
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 APP_ID = "240"
 APP_NAME = "css-blocklist-merge"
@@ -35,11 +36,14 @@ DEFAULT_SOURCES = (
     "https://github.com/Ballganda/css-server-blacklist/blob/main/server_blacklist.txt",
     "https://github.com/JakeM650/css-server-blacklist/blob/main/server_blacklist.txt",
     "https://github.com/krnl86/css-server-blacklist/blob/main/server_blacklist.txt",
+    "https://github.com/Exomatic/steamserverspamfilter/blob/main/spamip.txt",
 )
 
 #: One "server" entry is a { ... } block holding name/date/addr keys.
 BLOCK_RE = re.compile(r"\{([^{}]*)\}", re.S)
 KEY_RE = re.compile(r'"(\w+)"\s+"([^"]*)"')
+#: A bare IPv4 address on a line of its own, as in lists published for firewalls.
+PLAIN_IP_RE = re.compile(r"^\s*(\d{1,3}(?:\.\d{1,3}){3})\s*$", re.M)
 #: "path" entries inside steamapps/libraryfolders.vdf.
 VDF_PATH_RE = re.compile(r'"path"\s+"([^"]+)"')
 INSTALLDIR_RE = re.compile(r'"installdir"\s+"([^"]+)"')
@@ -236,6 +240,7 @@ def parse(text: str) -> list[tuple[str, str, str]]:
 
     Deliberately lenient: several published lists contain entries missing their
     "server" key or with inconsistent indentation, and the game accepts them.
+    A source with no such blocks is read as a plain IP list instead.
     """
     entries = []
     for block in BLOCK_RE.findall(text):
@@ -243,6 +248,23 @@ def parse(text: str) -> list[tuple[str, str, str]]:
         addr = keys.get("addr")
         if addr:
             entries.append((addr, keys.get("name", ""), keys.get("date", "0")))
+    return entries or parse_plain(text)
+
+
+def parse_plain(text: str) -> list[tuple[str, str, str]]:
+    """Read one IPv4 address per line, each blocked on every port ("ip:0").
+
+    Addresses ending in .0 are skipped: the game reads "a.b.c.0" as the whole
+    /24, which would block 256 addresses where the list means one.
+    """
+    entries = []
+    for ip in PLAIN_IP_RE.findall(text):
+        try:
+            ipaddress.IPv4Address(ip)
+        except ValueError:
+            continue
+        if not ip.endswith(".0"):
+            entries.append((f"{ip}:0", ip, "0"))
     return entries
 
 
