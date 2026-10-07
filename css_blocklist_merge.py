@@ -24,7 +24,7 @@ import sys
 import urllib.request
 from pathlib import Path
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 APP_ID = "240"
 APP_NAME = "css-blocklist-merge"
