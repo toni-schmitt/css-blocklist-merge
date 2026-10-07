@@ -62,6 +62,17 @@ class TestParse(unittest.TestCase):
         entries = tool.parse(MALFORMED)
         self.assertEqual(tool.parse(tool.render(entries)), entries)
 
+    def test_plain_ip_list_blocks_every_port(self):
+        self.assertEqual(
+            tool.parse("1.2.3.4\r\n  5.6.7.8  \r\n"),
+            [("1.2.3.4:0", "1.2.3.4", "0"), ("5.6.7.8:0", "5.6.7.8", "0")],
+        )
+
+    def test_plain_ip_list_skips_junk_and_whole_subnets(self):
+        # "a.b.c.0" would block the whole /24 in game, not the one address.
+        text = "# comment\n999.1.1.1\n91.206.93.0\n1.2.3.4:27015\n1.2.3.4 extra\n1.2.3.10\n"
+        self.assertEqual([e[0] for e in tool.parse(text)], ["1.2.3.10:0"])
+
 
 class TestRender(unittest.TestCase):
     def test_quotes_in_names_cannot_break_out(self):

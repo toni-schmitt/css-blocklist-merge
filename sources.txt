@@ -22,3 +22,8 @@ https://github.com/Ballganda/css-server-blacklist/blob/main/server_blacklist.txt
 
 # Smaller, independently collected list.
 https://github.com/JakeM650/css-server-blacklist/blob/main/server_blacklist.txt
+
+# ~1.8k bare IPs, published for firewalls and derived from the hl2dm.org
+# spamfilter; covers spam across Source games, not only CS:S. Every address
+# is blocked on all ports. Last, so the lists above supply server names.
+https://github.com/Exomatic/steamserverspamfilter/blob/main/spamip.txt
